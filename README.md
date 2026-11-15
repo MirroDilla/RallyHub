@@ -27,6 +27,9 @@ docker compose exec app python -m scripts.seed
 ```
 Detener: `docker compose down`. **`docker compose down -v` borra todos los datos.**
 
+### Demo en GitHub Codespaces
+En GitHub: **Code → Codespaces → Create codespace on main**. Al arrancar, `.devcontainer/` instala Docker y ejecuta `scripts/codespace-demo.sh`, que crea `.env` con secretos aleatorios y datos de demostración, permite el origen del codespace, levanta todo y publica el puerto 8000. La URL aparece en la terminal y en la pestaña **PORTS** (`https://<codespace>-8000.app.github.dev`). Si el codespace se suspendió, al reanudarlo el script vuelve a levantar la app; también se puede ejecutar a mano con `bash scripts/codespace-demo.sh`. Es un entorno de demostración, no de producción.
+
 ## Usuarios de demostración (SOLO DESARROLLO)
 | Rol | Correo | Contraseña |
 |---|---|---|
@@ -67,4 +70,4 @@ docs/             arquitectura, requisitos, manuales, diagramas, estado
 - *Login bloqueado:* espere la ventana de bloqueo o reinicie la app (límite en memoria).
 
 ## Documentación
-`docs/` y `RallyHub_Documentacion_Tecnica.docx`. Límites conocidos: `docs/ALCANCE_Y_LIMITACIONES.md`.
+`docs/` y `documentacion/` (documentación técnica en Word, presentación de sustentación y guía del código). Límites conocidos: `docs/ALCANCE_Y_LIMITACIONES.md`.

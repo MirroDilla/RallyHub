@@ -1,0 +1,16 @@
+{
+  // Codespace para la demostración de RallyHub: Docker dentro del contenedor y la app en el puerto 8000.
+  "name": "RallyHub (demo)",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu-24.04",
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {},
+    "ghcr.io/devcontainers/features/github-cli:1": {}
+  },
+  "hostRequirements": { "cpus": 2, "memory": "4gb" },
+  "forwardPorts": [8000],
+  "portsAttributes": {
+    "8000": { "label": "RallyHub", "onAutoForward": "openBrowser" }
+  },
+  // Cada vez que el codespace arranca (o se reanuda) levanta base de datos y aplicación.
+  "postStartCommand": "bash scripts/codespace-demo.sh"
+}
