@@ -39,6 +39,9 @@ En GitHub: **Code → Codespaces → Create codespace on main**. Al arrancar, `.
 
 Son datos ficticios; nunca los use en producción (el seed se ignora con `ENVIRONMENT=production`).
 
+## Registro rápido
+En la pantalla de inicio de sesión, el botón **Registro rápido** abre `/registro`, donde un estudiante crea su cuenta con nombre, apellidos, correo y contraseña (mínimo 10 caracteres, con letras y números) y entra directamente a su panel. Solo crea cuentas de **estudiante**; entrenadores y administradores los sigue creando la administración. Queda registrado en la auditoría y se limita a 5 registros por hora por conexión. Para desactivarlo: `SELF_REGISTRATION=false` en `.env`.
+
 ## Pruebas
 Unitarias (sin dependencias de BD), desde `backend/`:
 ```bash

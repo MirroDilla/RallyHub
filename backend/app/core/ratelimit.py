@@ -19,11 +19,13 @@ class LoginThrottle:
         window_seconds: int = 900,
         clock: Callable[[], float] = time.monotonic,
         max_keys: int = 10_000,
+        message: str = "Demasiados intentos fallidos. Intenta de nuevo en unos minutos.",
     ):
         self.max_attempts = max_attempts
         self.window = window_seconds
         self._clock = clock
         self._max_keys = max_keys
+        self._message = message
         self._failures: dict[str, deque[float]] = {}
         self._lock = threading.Lock()
 
@@ -40,7 +42,7 @@ class LoginThrottle:
             now = self._clock()
             q = self._prune(key, now)
             if len(q) >= self.max_attempts:
-                raise TooManyRequests("Demasiados intentos fallidos. Intenta de nuevo en unos minutos.")
+                raise TooManyRequests(self._message)
 
     def register_failure(self, key: str) -> None:
         with self._lock:
@@ -60,3 +62,13 @@ def get_login_throttle() -> LoginThrottle:
 
     cfg = get_settings()
     return LoginThrottle(cfg.login_max_attempts, cfg.login_window_seconds)
+
+
+@lru_cache
+def get_register_throttle() -> LoginThrottle:
+    """Limita los registros rápidos por IP (cuenta cada intento, exitoso o no)."""
+    from app.core.config import get_settings
+
+    cfg = get_settings()
+    return LoginThrottle(cfg.register_max_attempts, cfg.register_window_seconds,
+                         message="Demasiados registros desde esta conexión. Intenta más tarde.")

@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from app.core.config import Settings, get_settings
-from app.core.ratelimit import get_login_throttle
+from app.core.ratelimit import get_login_throttle, get_register_throttle
 from app.core.tokens import InvalidToken, decode_session_token
 from app.db.session import get_db
 from app.dependencies.auth import (
@@ -17,13 +17,14 @@ from app.dependencies.auth import (
     CurrentUser,
 )
 from app.dependencies.services import AuthSvc, Pager, page
-from app.domain.errors import AuthenticationError
+from app.domain.errors import AuthenticationError, ForbiddenError
 from app.models import User
 from app.schemas.auth import (
     ChangeEmailRequest,
     ChangePasswordRequest,
     LoginRequest,
     MeRead,
+    RegisterRequest,
     UserRead,
 )
 from app.schemas.common import Message, Page
@@ -58,6 +59,25 @@ def login(body: LoginRequest, request: Request, resp: Response, svc: AuthSvc,
         throttle.register_failure(key)
         raise
     throttle.reset(key)
+    _set_cookies(resp, settings, token, csrf)
+    return svc.me(user)
+
+
+@router.post("/auth/register", response_model=MeRead, status_code=status.HTTP_201_CREATED,
+             summary="Registro rápido de estudiante (abre sesión)")
+def register(body: RegisterRequest, request: Request, resp: Response, svc: AuthSvc,
+             settings: SettingsDep):
+    """Crea una cuenta de ESTUDIANTE con los datos mínimos e inicia su sesión.
+
+    Se puede desactivar con SELF_REGISTRATION=false. Limita los intentos por IP.
+    """
+    if not settings.self_registration:
+        raise ForbiddenError("El registro rápido está deshabilitado. Pide tu cuenta a la administración.")
+    throttle = get_register_throttle()
+    key = request.client.host if request.client else "?"
+    throttle.check(key)
+    throttle.register_failure(key)  # cuenta cada intento, exitoso o no
+    user, token, csrf = svc.register(body)
     _set_cookies(resp, settings, token, csrf)
     return svc.me(user)
 

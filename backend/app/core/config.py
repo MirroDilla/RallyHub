@@ -48,6 +48,11 @@ class Settings(BaseSettings):
     login_max_attempts: int = 5
     login_window_seconds: int = 900
 
+    # Registro rápido: un estudiante crea su propia cuenta desde /registro
+    self_registration: bool = True
+    register_max_attempts: int = 5  # registros por conexión (IP) dentro de la ventana
+    register_window_seconds: int = 3600
+
     @model_validator(mode="after")
     def _check(self) -> Settings:
         if self.opening_time >= self.closing_time:

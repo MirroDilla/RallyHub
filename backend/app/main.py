@@ -118,6 +118,10 @@ def create_app() -> FastAPI:
     def index():
         return FileResponse(STATIC_DIR / "index.html", headers={"Cache-Control": "no-cache"})
 
+    @app.get("/registro", include_in_schema=False)
+    def register_page():
+        return FileResponse(STATIC_DIR / "registro.html", headers={"Cache-Control": "no-cache"})
+
     @app.get("/login", include_in_schema=False)
     def login_page():
         return FileResponse(STATIC_DIR / "login.html", headers={"Cache-Control": "no-cache"})

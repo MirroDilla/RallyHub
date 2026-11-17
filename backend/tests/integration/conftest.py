@@ -49,9 +49,10 @@ def _clean_tables():
 
 @pytest.fixture(autouse=True)
 def _reset_login_throttle():
-    from app.core.ratelimit import get_login_throttle
+    from app.core.ratelimit import get_login_throttle, get_register_throttle
 
     get_login_throttle.cache_clear()  # el limitador es global al proceso: aislar cada prueba
+    get_register_throttle.cache_clear()
     yield
 
 

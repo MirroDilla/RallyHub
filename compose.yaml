@@ -58,6 +58,7 @@ services:
       CANCEL_MIN_HOURS_BEFORE: ${CANCEL_MIN_HOURS_BEFORE:-2}
       RUN_MIGRATIONS: ${RUN_MIGRATIONS:-1}
       SEED_DEMO: ${SEED_DEMO:-0}
+      SELF_REGISTRATION: ${SELF_REGISTRATION:-true}
     ports:
       - "${APP_PORT:-8000}:8000"
     networks: [backend]

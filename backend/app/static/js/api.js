@@ -33,7 +33,8 @@ export async function api(path, { method = 'GET', body, params } = {}) {
   let data = null;
   try { data = await res.json(); } catch { /* cuerpo vacío o no JSON */ }
   if (res.ok) return data;
-  if (res.status === 401 && !location.pathname.startsWith('/login') && path !== '/auth/login') {
+  const publicPage = location.pathname.startsWith('/login') || location.pathname.startsWith('/registro');
+  if (res.status === 401 && !publicPage && path !== '/auth/login' && path !== '/auth/register') {
     location.href = '/login';
   }
   const msg = (data && typeof data.detail === 'string' && data.detail) || `Error ${res.status}`;

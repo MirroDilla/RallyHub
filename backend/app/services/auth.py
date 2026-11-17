@@ -10,10 +10,10 @@ from app.domain.errors import (
     InvalidCurrentPassword,
     NotFoundError,
 )
-from app.models import User
-from app.models.enums import Role
+from app.models import Student, User
+from app.models.enums import Level, Role
 from app.repositories.people import UserRepository
-from app.schemas.auth import MeRead, UserRead
+from app.schemas.auth import MeRead, RegisterRequest, UserRead
 from app.services.base import Service, require_roles
 
 
@@ -24,6 +24,29 @@ class AuthService(Service):
         ok = verify_password(password, user.password_hash if user else None)
         if user is None or not ok or not user.is_active:
             raise AuthenticationError("Credenciales inválidas.")
+        csrf = new_csrf_token()
+        token = create_session_token(
+            self.settings.secret_key.get_secret_value(), user.id, user.token_version, csrf,
+            self.settings.access_token_minutes, now=self.now(),
+        )
+        return user, token, csrf
+
+    def register(self, data: RegisterRequest) -> tuple[User, str, str]:
+        """Registro rápido: crea un estudiante (nunca otro rol) y abre su sesión."""
+        if UserRepository(self.db).by_email(data.email):
+            raise DuplicateError("Ya existe un usuario con ese correo.")
+        user = User(email=data.email, password_hash=hash_password(data.password),
+                    role=Role.STUDENT, is_active=True, token_version=0)
+        student = Student(user=user, first_name=data.first_name, last_name=data.last_name,
+                          level=Level.BEGINNER, is_active=True)
+        try:
+            self.db.add_all([user, student])
+            self.db.flush()
+            self.audit(user, "REGISTER", "student", student.id, "registro rápido")
+            self.db.commit()
+        except IntegrityError as exc:
+            self.db.rollback()
+            raise DuplicateError("Ya existe un usuario con ese correo.") from exc
         csrf = new_csrf_token()
         token = create_session_token(
             self.settings.secret_key.get_secret_value(), user.id, user.token_version, csrf,
